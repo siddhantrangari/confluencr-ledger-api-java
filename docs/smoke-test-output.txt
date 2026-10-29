@@ -1,0 +1,51 @@
+PASS  200  GET /health
+      {"status":"ok"}
+PASS  201  create account A
+      {"id":"6361a3ce-f94a-4fd8-9663-1bdc1ef24d55","name":"Alice","balance":"0.00","created_at":"2026-10-29T18:09:06.013624Z"}
+PASS  201  create account B
+      {"id":"dbfc42dc-0d26-4b6d-ad37-a22ed3aa04e7","name":"Bob","balance":"0.00","created_at":"2026-10-29T18:09:06.06013Z"}
+PASS  400  client can't set balance
+      {"error":{"code":"VALIDATION_ERROR","message":"Invalid request: balance: Unknown field","details":[{"field":"balance","message":"Unknown field"}],"request_id":"
+PASS  400  blank name
+      {"error":{"code":"VALIDATION_ERROR","message":"Invalid request: name: size must be between 1 and 100","details":[{"field":"name","message":"size must be between
+PASS  400  malformed JSON
+      {"error":{"code":"INVALID_REQUEST_BODY","message":"Invalid request: body: Request body must be a valid JSON object","details":[{"field":"body","message":"Reques
+PASS  201  credit 100 to A
+      {"transaction":{"id":"81c15f7d-e518-4a81-9f7b-d9a57f1cde9a","account_id":"6361a3ce-f94a-4fd8-9663-1bdc1ef24d55","type":"credit","amount":"100.00","description":
+PASS  409  same reference_id again -> duplicate, original returned
+      {"error":{"code":"DUPLICATE_TRANSACTION","message":"A transaction with reference_id 'inv-1' already exists for account 6361a3ce-f94a-4fd8-9663-1bdc1ef24d55; no 
+PASS  201  credit 50 to A
+      {"transaction":{"id":"533d3227-30d7-49b7-a038-6c43552af0af","account_id":"6361a3ce-f94a-4fd8-9663-1bdc1ef24d55","type":"credit","amount":"50.00","description":n
+PASS  201  debit 30 from A
+      {"transaction":{"id":"28c6974b-c2cc-4950-beee-3a45e1c68c46","account_id":"6361a3ce-f94a-4fd8-9663-1bdc1ef24d55","type":"debit","amount":"30.00","description":nu
+PASS  201  debit 20 from A
+      {"transaction":{"id":"b8b9bd36-b8a3-49a7-b450-4962a48347e0","account_id":"6361a3ce-f94a-4fd8-9663-1bdc1ef24d55","type":"debit","amount":"20.00","description":nu
+PASS  422  debit 1000 -> insufficient balance
+      {"error":{"code":"INSUFFICIENT_BALANCE","message":"Insufficient balance: available 100.00, requested 1000.00","details":{"requested_amount":"1000.00","account_i
+PASS  400  invalid type
+      {"error":{"code":"INVALID_TRANSACTION_TYPE","message":"Invalid request: type: must be 'credit' or 'debit'","details":[{"field":"type","message":"must be 'credit
+PASS  400  invalid amount
+      {"error":{"code":"INVALID_AMOUNT","message":"Invalid request: amount: must be greater than 0","details":[{"field":"amount","message":"must be greater than 0"}],
+PASS  404  unknown account
+      {"error":{"code":"ACCOUNT_NOT_FOUND","message":"Account 00000000-0000-0000-0000-000000000000 does not exist","details":{"account_id":"00000000-0000-0000-0000-00
+PASS  200  balance of A = 100.00 (0 +100 +50 -30 -20)
+      {"account_id":"6361a3ce-f94a-4fd8-9663-1bdc1ef24d55","balance":"100.00"}
+      balance is 100.00
+PASS  201  transfer 30 A -> B
+      {"transfer_id":"09a149ef-34d0-4867-a6ec-d86d677b0052","reference_id":"tr-1","amount":"30.00","debit":{"id":"004b806f-5bda-4914-a599-478189741d18","account_id":"
+PASS  422  transfer 500 A -> B -> insufficient
+      {"error":{"code":"INSUFFICIENT_BALANCE","message":"Insufficient balance: available 70.00, requested 500.00","details":{"requested_amount":"500.00","account_id":
+PASS  400  transfer to self
+      {"error":{"code":"SAME_ACCOUNT_TRANSFER","message":"from_account_id and to_account_id must be different accounts","details":null,"request_id":"dcf706b5-5cda-494
+PASS  200  history of A, debits only, page 1 of size 2
+      {"data":[{"id":"004b806f-5bda-4914-a599-478189741d18","account_id":"6361a3ce-f94a-4fd8-9663-1bdc1ef24d55","type":"debit","amount":"30.00","description":"Transfe
+PASS  400  invalid pagination
+      {"error":{"code":"INVALID_PAGINATION","message":"Invalid request: limit: must be less than or equal to 100","details":[{"field":"limit","message":"must be less 
+PASS  405  DELETE a transaction is not possible
+      {"error":{"code":"METHOD_NOT_ALLOWED","message":"Method Not Allowed","details":null,"request_id":"917a426b-bfce-4275-8f6c-b0797aff9e0a"}}
+PASS  200  OpenAPI spec
+      {"openapi":"3.0.1","info":{"title":"Transaction Ledger API","description":"Accounts, idempotent credit/debit transactions, paginated history and atomic transfer
+PASS  200  Swagger UI
+      <!-- HTML for static distribution bundle build --> <!DOCTYPE html> <html lang="en">   <head>     <meta charset="UTF-8">     <title>Swagger UI</title>     <link 
+
+24 passed, 0 failed
