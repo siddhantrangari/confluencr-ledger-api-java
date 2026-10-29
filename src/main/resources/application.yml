@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: ledger-api
+  datasource:
+    # Matches docker-compose.yml. In Docker this is overridden with SPRING_DATASOURCE_URL.
+    url: jdbc:postgresql://localhost:5434/ledger
+    username: ledger
+    password: ledger
+  jackson:
+    # JSON fields are snake_case (reference_id); Java fields stay camelCase (referenceId).
+    property-naming-strategy: SNAKE_CASE
+    deserialization:
+      # {"name": "A", "balance": 500} is a 400, not a silently ignored field.
+      fail-on-unknown-properties: true
+
+springdoc:
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+  swagger-ui:
+    path: /swagger-ui
+  # Don't attach every @ExceptionHandler response to every endpoint; ApiErrors lists them per endpoint.
+  override-with-generic-response: false
+
+server:
+  error:
+    whitelabel:
+      enabled: false
